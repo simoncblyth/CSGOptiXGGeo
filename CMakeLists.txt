@@ -6,20 +6,29 @@ include(OpticksBuildOptions)
 find_package(CUDA REQUIRED)   
 find_package(CSG REQUIRED)
 find_package(OptiX REQUIRED)   
+find_package(GGeo REQUIRED CONFIG)
+find_package(CSGOptiX REQUIRED CONFIG)
 
+message(STATUS "CSG_FOUND      : ${CSG_FOUND}      CSG_INCLUDE_DIRS      : ${CSG_INCLUDE_DIRS}")
+message(STATUS "OptiX_FOUND    : ${OptiX_FOUND}    OptiX_INCLUDE_DIRS    : ${OptiX_INCLUDE_DIRS}")
+message(STATUS "GGeo_FOUND     : ${GGeo_FOUND}     GGeo_INCLUDE_DIRS     : ${GGeo_INCLUDE_DIRS}")
+message(STATUS "CSGOptiX_FOUND : ${CSGOptiX_FOUND} CSGOptiX_INCLUDE_DIRS : ${CSGOptiX_INCLUDE_DIRS}")
 
-message(STATUS "CSG_FOUND : ${CSG_FOUND} ")
+set(SOURCES)
 
+list(APPEND SOURCES
+    Converter.cc 
+    ${name}.cc
+)
 
 include_directories(
     ${CUDA_INCLUDE_DIRS}
     ${OptiX_INCLUDE}
+    ${CSGOptiX_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR} 
 )
 
-find_package(GGeo REQUIRED CONFIG)
-
-add_executable(${name} ${name}.cc)
-target_link_libraries(${name} Opticks::GGeo CSG )
+add_executable(${name} ${SOURCES})
+target_link_libraries(${name} Opticks::GGeo CSG CSGOptiX Opticks::OptiX)
 install(TARGETS ${name}  DESTINATION lib)
 

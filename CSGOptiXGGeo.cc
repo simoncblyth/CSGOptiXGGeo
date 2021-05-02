@@ -1,34 +1,11 @@
-#include <iostream>
-#include <iomanip>
-
 #include "OPTICKS_LOG.hh"
 #include "Opticks.hh"
-
 #include "GGeo.hh"
-#include "GGeoLib.hh"
-#include "GParts.hh"
 
 #include "sutil_vec_math.h"
 #include "CSGFoundry.h"
-
-
-struct CSGOptiXGGeo
-{
-    GGeo*      ggeo ; 
-    GGeoLib*   geolib ; 
-    CSGFoundry foundry ; 
-
-    CSGOptiXGGeo(GGeo* gg) ; 
-}; 
-
-CSGOptiXGGeo::CSGOptiXGGeo(GGeo* ggeo_)
-    :
-    ggeo(ggeo_),
-    geolib(ggeo->getGeoLib())
-{
-}
-
-
+#include "CSGOptiX.h"
+#include "Converter.h"
 
 int main(int argc, char** argv)
 {
@@ -37,15 +14,30 @@ int main(int argc, char** argv)
     int partIdxRel  = argc > 3 ? atoi(argv[3]) : -1 ; 
 
     OPTICKS_LOG(argc, argv);
-
     Opticks ok(argc, argv);
 
-    GGeo* gg = GGeo::Load(&ok); 
+    GGeo* ggeo = GGeo::Load(&ok); 
+    ggeo->dumpParts("CSGOptiXGGeo.main", repeatIdx, primIdx, partIdxRel ) ;
 
-    gg->dumpParts("CSGOptiXGGeo.main", repeatIdx, primIdx, partIdxRel ) ;
+    bool dump = true ; 
+    CSGFoundry foundry ; 
+    Converter conv(&foundry, ggeo, dump ) ; 
+    conv.convert(repeatIdx, primIdx, partIdxRel); 
 
-    CSGOptiXGGeo cog(gg); 
+    CSGOptiX cx(&foundry); 
+
+    foundry.dump(); 
+    foundry.upload();   // uploads nodes, planes, transforms
+
+    const float4 gce = make_float4( 0.f, 0.f, 0.f, 300.f );   
+    glm::vec4 ce(gce.x,gce.y,gce.z, gce.w*1.4f );   // defines the center-extent of the region to view
+
+    float tmin = 0.1 ; 
+    float tmax = 10000.f ; 
+    const char* tspec = "g0" ; 
+
+    cx.setCE(ce, tmin, tmax); 
+    cx.render( tspec );  
 
     return 0 ; 
 }
-

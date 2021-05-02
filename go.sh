@@ -10,7 +10,8 @@ name=$(basename $sdir)
 bdir=/tmp/$USER/opticks/$name/build 
 rm   -rf $bdir && mkdir -p $bdir && cd $bdir && pwd 
 
-
+export CSGOPTIX_PREFIX=/tmp/$USER/opticks/CSGOptiX
+export CMAKE_PREFIX_PATH=${CSGOPTIX_PREFIX}:${CMAKE_PREFIX_PATH}
 
 cmake $sdir \
     -DCMAKE_BUILD_TYPE=Debug \
