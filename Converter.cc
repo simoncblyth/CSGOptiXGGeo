@@ -126,7 +126,7 @@ CSGSolid* Converter::convert_( unsigned repeatIdx )
     }   
     so->center_extent = bb.center_extent() ;  
 
-    addInstances(repeatIdx); 
+    //addInstances(repeatIdx); 
 
     LOG(info) << " solid.bb " <<  bb ;
     LOG(info) << " solid.ce " << so->center_extent ;
