@@ -71,6 +71,13 @@ void Converter::addInstances(unsigned repeatIdx )
     const GMergedMesh* mm = ggeo->getMergedMesh(repeatIdx); 
     unsigned num_inst = mm->getNumITransforms() ;
 
+    LOG(info)
+        << " nmm " << nmm
+        << " repeatIdx " << repeatIdx
+        << " num_inst " << num_inst 
+        ;
+
+
     for(unsigned i=0 ; i < num_inst ; i++)
     {
         glm::mat4 it = mm->getITransform_(i); 

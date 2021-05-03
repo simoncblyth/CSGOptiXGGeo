@@ -28,10 +28,10 @@ int main(int argc, char** argv)
     Opticks ok(argc, argv);
     ok.configure(); 
 
+    bool dump = CXUtil::GetEValue<bool>("DUMP", false ); 
     GGeo* ggeo = GGeo::Load(&ok); 
-    ggeo->dumpParts("CSGOptiXGGeo.main", repeatIdx, primIdx, partIdxRel ) ;
+    if(dump) ggeo->dumpParts("CSGOptiXGGeo.main", repeatIdx, primIdx, partIdxRel ) ;
 
-    bool dump = true ; 
     CSGFoundry foundry ; 
     Converter conv(&foundry, ggeo, dump) ; 
     conv.convert(repeatIdx, primIdx, partIdxRel); 
