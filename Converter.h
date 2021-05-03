@@ -13,6 +13,7 @@ struct Converter
     CSGFoundry* foundry ; 
     const GGeo* ggeo ; 
     bool dump ; 
+    float splay ; 
 
     Converter(CSGFoundry* foundry, const GGeo* ggeo, bool dump ) ; 
 
@@ -21,7 +22,7 @@ struct Converter
 
     CSGSolid* convert_(unsigned repeatIdx );
     CSGPrim*  convert_(const GParts* comp, unsigned primIdx );
-    CSGNode*  convert_(const GParts* comp, unsigned primIdx, unsigned partIdx );
+    CSGNode*  convert_(const GParts* comp, unsigned primIdx, unsigned partIdxRel );
 };
 
 

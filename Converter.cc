@@ -16,6 +16,7 @@
 #include "CSGNode.h" 
 #include "AABB.h"
 
+#include "CXUtil.h"
 #include "PLOG.hh"
 #include "Converter.h"
 
@@ -24,7 +25,8 @@ Converter::Converter(CSGFoundry* foundry_, const GGeo* ggeo_, bool dump_ )
     : 
     foundry(foundry_),
     ggeo(ggeo_),
-    dump(dump_)
+    dump(dump_),
+    splay(CXUtil::GetEValue<float>("SPLAY", 0.f ))
 {
 }
 
@@ -120,8 +122,7 @@ CSGPrim* Converter::convert_(const GParts* comp, unsigned primIdx )
 
     for(unsigned partIdxRel=0 ; partIdxRel < numParts ; partIdxRel++ )
     {
-        unsigned partIdx = partOffset + partIdxRel ;
-        CSGNode* n = convert_(comp, primIdx, partIdx); 
+        CSGNode* n = convert_(comp, primIdx, partIdxRel); 
         bb.include_aabb( n->AABB() );
     }
 
@@ -132,26 +133,34 @@ CSGPrim* Converter::convert_(const GParts* comp, unsigned primIdx )
 
 
 
-CSGNode* Converter::convert_(const GParts* comp, unsigned primIdx, unsigned partIdx )
+CSGNode* Converter::convert_(const GParts* comp, unsigned primIdx, unsigned partIdxRel )
 {
-    unsigned tc = comp->getTypeCode(partIdx);
+    unsigned partOffset = comp->getPartOffset(primIdx) ;
+    unsigned partIdx = partOffset + partIdxRel ;
     unsigned idx = comp->getIndex(partIdx);
     assert( idx == partIdx ); 
 
-    unsigned gt = comp->getGTransform(partIdx);
     //const char*  tn = comp->getTypeName(partIdx);
     std::string tag = comp->getTag(partIdx); 
+    unsigned tc = comp->getTypeCode(partIdx);
 
-    unsigned tranIdx = 0 ; 
-    if( gt > 0 )
+    const Tran<float>* tv = nullptr ; 
+    if( splay != 0.f )
     {
-        glm::mat4 t = comp->getTran(gt-1,0) ;
-        glm::mat4 v = comp->getTran(gt-1, 1); 
-        Tran<float> tv(t, v); 
-        tranIdx = 1 + foundry->addTran(tv);   
-        //std::cout << gpresent( "t", t ) << std::endl ;
+        tv = Tran<float>::make_translate(0.f, float(primIdx)*splay, float(partIdxRel)*splay ); 
+    }
+    else
+    {
+        unsigned gt = comp->getGTransform(partIdx);
+        if( gt > 0 )
+        {
+            glm::mat4 t = comp->getTran(gt-1,0) ;
+            glm::mat4 v = comp->getTran(gt-1,1); 
+            tv = new Tran<float>(t, v); 
+        }
     }
 
+    unsigned tranIdx = tv ?  1 + foundry->addTran(*tv) : 0 ; 
     const float* param = comp->getPartValues(partIdx, 0, 0 );  
     if(dump)
     {

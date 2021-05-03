@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 
     bool dump = true ; 
     CSGFoundry foundry ; 
-    Converter conv(&foundry, ggeo, dump ) ; 
+    Converter conv(&foundry, ggeo, dump) ; 
     conv.convert(repeatIdx, primIdx, partIdxRel); 
 
     CSGOptiX cx(&foundry); 
