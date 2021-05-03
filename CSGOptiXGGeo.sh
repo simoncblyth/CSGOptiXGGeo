@@ -10,9 +10,8 @@ getting pileup at origin::
 EOU
 }
 
+source ./env.sh $*
 ridx=$1
-export OUTDIR=/tmp/$USER/opticks/CSGOptiXGGeo/$ridx
-mkdir -p $OUTDIR
 
 case $ridx in 
   0) EYE=-0.05,0.0,0.0,1.0 CSGOptiXGGeo $ridx  ;;
@@ -32,5 +31,8 @@ esac
 jpg=$OUTDIR/pixels.jpg
 echo $jpg
 ls -l $jpg
-open $jpg
+
+if [ "$(uname)" == "Darwin" ]; then
+   open $jpg
+fi
 
