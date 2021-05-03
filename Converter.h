@@ -1,6 +1,10 @@
 #pragma once
 
 struct CSGFoundry ;
+struct CSGSolid ; 
+struct CSGPrim ; 
+struct CSGNode ; 
+
 class GGeo ;
 class GParts ; 
 
@@ -14,10 +18,10 @@ struct Converter
 
     void convert(int repeatIdx,  int primIdx, int partIdxRel );
     void convert_();
-    void convert_(unsigned repeatIdx );
-    void convert_(unsigned repeatIdx, unsigned primIdx );
-    void convert_(unsigned repeatIdx, unsigned primIdx, unsigned partIdxRel );
-    void convertPart(const GParts* comp, unsigned primIdx, unsigned partIdx );
+
+    CSGSolid* convert_(unsigned repeatIdx );
+    CSGPrim*  convert_(const GParts* comp, unsigned primIdx );
+    CSGNode*  convert_(const GParts* comp, unsigned primIdx, unsigned partIdx );
 };
 
 

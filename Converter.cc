@@ -14,6 +14,7 @@
 #include "CSGSolid.h" 
 #include "CSGPrim.h" 
 #include "CSGNode.h" 
+#include "AABB.h"
 
 #include "PLOG.hh"
 #include "Converter.h"
@@ -27,15 +28,18 @@ Converter::Converter(CSGFoundry* foundry_, const GGeo* ggeo_, bool dump_ )
 {
 }
 
+
 void Converter::convert(int repeatIdx,  int primIdx, int partIdxRel )
 {
     if( repeatIdx > -1 && primIdx > -1 && partIdxRel > -1 )
     {   
-        convert_(repeatIdx, primIdx, partIdxRel);
+        const GParts* comp = ggeo->getCompositeParts(repeatIdx) ; 
+        convert_(comp, primIdx, partIdxRel);
     }
     else if( repeatIdx > -1 && primIdx > -1  )
     {   
-        convert_(repeatIdx, primIdx);
+        const GParts* comp = ggeo->getCompositeParts(repeatIdx) ; 
+        convert_(comp, primIdx);
     }
     else if( repeatIdx > -1 )
     {   
@@ -56,7 +60,7 @@ void Converter::convert_()
     }
 }
 
-void Converter::convert_( unsigned repeatIdx )
+CSGSolid* Converter::convert_( unsigned repeatIdx )
 {
     const GParts* comp = ggeo->getCompositeParts(repeatIdx) ; 
     unsigned numPrim = comp->getNumPrim();
@@ -75,66 +79,66 @@ void Converter::convert_( unsigned repeatIdx )
     CSGSolid* so = foundry->addSolid(numPrim, label );
     assert(so); 
 
+    AABB bb = {} ;
+
     for(unsigned primIdx=0 ; primIdx < numPrim ; primIdx++)
     {   
-        convert_(repeatIdx, primIdx); 
+        CSGPrim* p = convert_(comp, primIdx); 
+        bb.include_aabb( p->AABB() );
     }   
+    so->center_extent = bb.center_extent() ;  
+
+    LOG(info) << " solid.bb " <<  bb ;
+    LOG(info) << " solid.ce " << so->center_extent ;
+    LOG(info) << " solid.desc " << so->desc() ;
+
+    return so ; 
 }
 
 
-void Converter::convert_( unsigned repeatIdx, unsigned primIdx )
+CSGPrim* Converter::convert_(const GParts* comp, unsigned primIdx )
 {
-    const GParts* comp = ggeo->getCompositeParts(repeatIdx); 
     unsigned numPrim = comp->getNumPrim();
     assert( primIdx < numPrim ); 
     unsigned numParts = comp->getNumParts(primIdx) ;
-
+    unsigned partOffset = comp->getPartOffset(primIdx) ;
     unsigned sbtIdx = primIdx ; // should be absolute ?
 
     LOG(info)
         << " sbtIdx " << sbtIdx
-        << " repeatIdx " << repeatIdx 
         << " primIdx " << primIdx 
         << " numPrim " << numPrim
         << " numParts " << numParts 
+        << " partOffset " << partOffset
         ;   
 
     CSGPrim* pr = foundry->addPrim(numParts); 
     assert(pr) ; 
     pr->setSbtIndexOffset(sbtIdx) ;
 
+    AABB bb = {} ;
+
     for(unsigned partIdxRel=0 ; partIdxRel < numParts ; partIdxRel++ )
     {
-        convert_(repeatIdx, primIdx, partIdxRel);
+        unsigned partIdx = partOffset + partIdxRel ;
+        CSGNode* n = convert_(comp, primIdx, partIdx); 
+        bb.include_aabb( n->AABB() );
     }
 
-    // need to combine AABB ?
-    // pr->setAABB( n->AABB() );
+    pr->setAABB( bb.data() ); 
+
+    return pr ; 
 }
 
 
-void Converter::convert_(unsigned repeatIdx, unsigned primIdx, unsigned partIdxRel )
-{
-    const GParts* comp = ggeo->getCompositeParts(repeatIdx);
-    unsigned partOffset = comp->getPartOffset(primIdx) ;
-    //unsigned tranOffset = comp->getTranOffset(primIdx) ;
-    unsigned numParts = comp->getNumParts(primIdx) ;
-    assert( partIdxRel < numParts );
-    unsigned partIdx = partOffset + partIdxRel ;
-    
-    convertPart(comp, primIdx, partIdx); 
-}
 
-
-void Converter::convertPart(const GParts* comp, unsigned primIdx, unsigned partIdx )
+CSGNode* Converter::convert_(const GParts* comp, unsigned primIdx, unsigned partIdx )
 {
     unsigned tc = comp->getTypeCode(partIdx);
     unsigned idx = comp->getIndex(partIdx);
     assert( idx == partIdx ); 
 
     unsigned gt = comp->getGTransform(partIdx);
-    //unsigned bnd = comp->getBoundary(partIdx);
-    //std::string  bn = comp->getBoundaryName(partIdx);
     //const char*  tn = comp->getTypeName(partIdx);
     std::string tag = comp->getTag(partIdx); 
 
@@ -167,6 +171,15 @@ void Converter::convertPart(const GParts* comp, unsigned primIdx, unsigned partI
     n->setIndex(partIdx); 
     n->setAABBLocal(); 
     n->setTransform(tranIdx); 
+
+    if(tranIdx > 0 )
+    {    
+        const qat4* q = foundry->getTran(tranIdx-1u) ;
+        q->transform_aabb_inplace( n->AABB() );
+    }
+
+    return n ; 
+
 }
 
 

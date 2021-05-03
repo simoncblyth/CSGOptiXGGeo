@@ -2,22 +2,20 @@
 
 msg="=== $BASH_SOURCE :"
 
-opticks-
-om-
-
 sdir=$(pwd)
 name=$(basename $sdir) 
 bdir=/tmp/$USER/opticks/$name/build 
 rm   -rf $bdir && mkdir -p $bdir && cd $bdir && pwd 
 
-export CSGOPTIX_PREFIX=/tmp/$USER/opticks/CSGOptiX
-export CMAKE_PREFIX_PATH=${CSGOPTIX_PREFIX}:${CMAKE_PREFIX_PATH}
+[ -z "$OPTICKS_PREFIX" ] && echo $msg MISSING OPTICKS_PREFIX && exit 1
+[ -z "$OPTICKS_HOME" ]   && echo $msg MISSING OPTICKS_HOME   && exit 2
 
 cmake $sdir \
     -DCMAKE_BUILD_TYPE=Debug \
-    -DOPTICKS_PREFIX=$(om-prefix) \
-    -DCMAKE_INSTALL_PREFIX=$(om-prefix) \
-    -DCMAKE_MODULE_PATH=$(om-home)/cmake/Modules
+    -DOPTICKS_PREFIX=${OPTICKS_PREFIX} \
+    -DCMAKE_MODULE_PATH=${OPTICKS_HOME}/cmake/Modules \
+    -DCMAKE_INSTALL_PREFIX=${OPTICKS_PREFIX}
+
 [ $? -ne 0 ] && echo $msg : config error && exit 1 
      
 make
@@ -25,6 +23,8 @@ make
 
 make install   
 [ $? -ne 0 ] && echo $msg : install error && exit 3
+
+
 
 exe=$(opticks-prefix)/lib/$name
 echo "running exe $exe"

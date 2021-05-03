@@ -4,8 +4,8 @@ project(${name} VERSION 0.1.0)
 include(OpticksBuildOptions)
 
 find_package(CUDA REQUIRED)   
-find_package(CSG REQUIRED)
-find_package(OptiX REQUIRED)   
+#find_package(CSG REQUIRED)
+#find_package(OptiX REQUIRED)   
 find_package(GGeo REQUIRED CONFIG)
 find_package(CSGOptiX REQUIRED CONFIG)
 
@@ -29,6 +29,11 @@ include_directories(
 )
 
 add_executable(${name} ${SOURCES})
-target_link_libraries(${name} Opticks::GGeo CSG CSGOptiX Opticks::OptiX)
+
+target_link_libraries(${name} PUBLIC
+    Opticks::GGeo 
+    Opticks::CSGOptiX 
+)
+
 install(TARGETS ${name}  DESTINATION lib)
 
