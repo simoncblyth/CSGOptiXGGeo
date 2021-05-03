@@ -53,7 +53,9 @@ int main(int argc, char** argv)
 
     float tmin = CXUtil::GetEValue<float>("TMIN", 1.0) ;
     float tmax = CXUtil::GetEValue<float>("TMAX", 10000.0) ;
-    const char* tspec = "g0" ; 
+
+    std::string top = CXUtil::GetEValue<std::string>("TOP", "g0"); 
+    const char* tspec = top.c_str(); 
 
     cx.setCE(ce, tmin, tmax); 
     cx.render( tspec );  

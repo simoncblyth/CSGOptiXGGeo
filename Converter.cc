@@ -8,12 +8,14 @@
 #include "GGeo.hh"
 #include "GGeoLib.hh"
 #include "GParts.hh"
+#include "GMergedMesh.hh"
 
 #include "sutil_vec_math.h"
 #include "CSGFoundry.h"
 #include "CSGSolid.h" 
 #include "CSGPrim.h" 
 #include "CSGNode.h" 
+#include "qat4.h"
 #include "AABB.h"
 
 #include "CXUtil.h"
@@ -62,8 +64,34 @@ void Converter::convert_()
     }
 }
 
+void Converter::addInstances(unsigned repeatIdx )
+{
+    unsigned nmm = ggeo->getNumMergedMesh(); 
+    assert( repeatIdx < nmm ); 
+    const GMergedMesh* mm = ggeo->getMergedMesh(repeatIdx); 
+    unsigned num_inst = mm->getNumITransforms() ;
+
+    for(unsigned i=0 ; i < num_inst ; i++)
+    {
+        glm::mat4 it = mm->getITransform_(i); 
+        qat4 instance(glm::value_ptr(it)) ;   
+        unsigned ins_idx = foundry->inst.size() ;
+        unsigned gas_idx = repeatIdx ; 
+        unsigned ias_idx = 0 ; 
+        instance.setIdentity( ins_idx, gas_idx, ias_idx );
+        foundry->inst.push_back( instance );
+    }
+}
+
+
 CSGSolid* Converter::convert_( unsigned repeatIdx )
 {
+    unsigned nmm = ggeo->getNumMergedMesh(); 
+    assert( repeatIdx < nmm ); 
+    const GMergedMesh* mm = ggeo->getMergedMesh(repeatIdx); 
+    unsigned num_inst = mm->getNumITransforms() ;
+
+
     const GParts* comp = ggeo->getCompositeParts(repeatIdx) ; 
     unsigned numPrim = comp->getNumPrim();
 
@@ -76,6 +104,7 @@ CSGSolid* Converter::convert_( unsigned repeatIdx )
         << " repeatIdx " << repeatIdx 
         << " numPrim " << numPrim
         << " label " << label 
+        << " num_inst " << num_inst 
         ;   
 
     CSGSolid* so = foundry->addSolid(numPrim, label );
@@ -89,6 +118,8 @@ CSGSolid* Converter::convert_( unsigned repeatIdx )
         bb.include_aabb( p->AABB() );
     }   
     so->center_extent = bb.center_extent() ;  
+
+    addInstances(repeatIdx); 
 
     LOG(info) << " solid.bb " <<  bb ;
     LOG(info) << " solid.ce " << so->center_extent ;

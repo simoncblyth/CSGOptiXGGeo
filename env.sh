@@ -4,6 +4,6 @@ ridx=$1
 export OUTDIR=/tmp/$USER/opticks/CSGOptiXGGeo/$ridx
 mkdir -p $OUTDIR
 
-export CUDA_VISIBLE_DEVICES=1 
+export CUDA_VISIBLE_DEVICES=0
 
 

@@ -21,6 +21,8 @@ struct Converter
     void convert_();
 
     CSGSolid* convert_(unsigned repeatIdx );
+    void addInstances(unsigned repeatIdx );
+
     CSGPrim*  convert_(const GParts* comp, unsigned primIdx );
     CSGNode*  convert_(const GParts* comp, unsigned primIdx, unsigned partIdxRel );
 };
