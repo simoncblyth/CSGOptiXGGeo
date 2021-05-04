@@ -10,19 +10,11 @@
 
 int main(int argc, char** argv)
 {
-    /*
-    int repeatIdx = argc > 1 ? atoi(argv[1]) : -1 ; 
-    int primIdx  = argc > 2 ? atoi(argv[2]) : -1 ; 
-    int partIdxRel  = argc > 3 ? atoi(argv[3]) : -1 ; 
-
-    */
-
     int repeatIdx = argc > 1 ? atoi(argv[1]) : 0 ; 
     int primIdx = -1 ; 
     int partIdxRel = -1 ; 
 
     std::cout << "repeatIdx " << repeatIdx << std::endl; 
-
 
     OPTICKS_LOG(argc, argv);
     Opticks ok(argc, argv);

@@ -11,6 +11,10 @@ EOU
 }
 
 source ./env.sh $*
+
+[ -z "$OPTIX_VERSION" ] && echo $BASH_SOURCE FAILED TO IDENTIFY OPTIX_VERSION && exit 1
+
+
 ridx=$1
 
 case $ridx in 
@@ -36,3 +40,5 @@ if [ "$(uname)" == "Darwin" ]; then
    open $jpg
 fi
 
+
+exit 0 
