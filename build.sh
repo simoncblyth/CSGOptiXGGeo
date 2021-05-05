@@ -4,7 +4,7 @@ msg="=== $BASH_SOURCE :"
 sdir=$(pwd)
 name=$(basename $sdir) 
 
-bdir=/tmp/$USER/opticks/$name/build 
+bdir=/tmp/$USER/opticks/${name}.build 
 rm   -rf $bdir && mkdir -p $bdir && cd $bdir && pwd 
 
 [ -z "$OPTICKS_PREFIX" ] && echo $msg MISSING OPTICKS_PREFIX && exit 1

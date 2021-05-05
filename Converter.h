@@ -15,6 +15,8 @@ struct Converter
     bool dump ; 
     float splay ; 
 
+    static const char* Label(unsigned repeatIdx ); 
+
     Converter(CSGFoundry* foundry, const GGeo* ggeo, bool dump ) ; 
 
     void convert(int repeatIdx,  int primIdx, int partIdxRel );

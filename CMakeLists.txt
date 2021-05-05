@@ -4,7 +4,7 @@ project(${name} VERSION 0.1.0)
 include(OpticksBuildOptions)
 
 find_package(CUDA REQUIRED)   
-#find_package(CSG REQUIRED)
+find_package(CSG REQUIRED)
 #find_package(OptiX REQUIRED)   
 find_package(GGeo REQUIRED CONFIG)
 find_package(CSGOptiX REQUIRED CONFIG)
@@ -14,26 +14,21 @@ message(STATUS "OptiX_FOUND    : ${OptiX_FOUND}    OptiX_INCLUDE_DIRS    : ${Opt
 message(STATUS "GGeo_FOUND     : ${GGeo_FOUND}     GGeo_INCLUDE_DIRS     : ${GGeo_INCLUDE_DIRS}")
 message(STATUS "CSGOptiX_FOUND : ${CSGOptiX_FOUND} CSGOptiX_INCLUDE_DIRS : ${CSGOptiX_INCLUDE_DIRS}")
 
-set(SOURCES)
-
-list(APPEND SOURCES
-    Converter.cc 
-    ${name}.cc
-)
 
 include_directories(
     ${CUDA_INCLUDE_DIRS}
     ${OptiX_INCLUDE}
     ${CSGOptiX_INCLUDE_DIRS}
+    ${OPTICKS_PREFIX}/externals/glm/glm
     ${CMAKE_CURRENT_SOURCE_DIR} 
 )
 
-add_executable(${name} ${SOURCES})
+add_executable(${name}Convert ${name}Convert.cc Converter.cc)
+add_executable(${name}Render  ${name}Render.cc)
 
-target_link_libraries(${name} PUBLIC
-    Opticks::GGeo 
-    Opticks::CSGOptiX 
-)
+target_link_libraries(${name}Convert PUBLIC Opticks::GGeo Opticks::CSG)
+target_link_libraries(${name}Render  PUBLIC Opticks::CSGOptiX )
 
-install(TARGETS ${name}  DESTINATION lib)
+install(TARGETS ${name}Convert  DESTINATION lib)
+install(TARGETS ${name}Render   DESTINATION lib)
 
