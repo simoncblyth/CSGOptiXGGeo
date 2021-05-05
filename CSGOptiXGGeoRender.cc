@@ -30,14 +30,22 @@ int main(int argc, char** argv)
     //fd->dump(); 
 
     const CSGSolid* so = fd->getSolid(repeatIdx); 
-    std::cout << " repeatIdx " << repeatIdx << " so " << so->desc() << std::endl ; 
+    float extent = so->center_extent.w ; 
+    std::cout 
+        << " repeatIdx " << repeatIdx 
+        << " extent " << extent 
+        << " so " << so->desc() 
+        << std::endl 
+        ; 
+
     const float4 gce = so->center_extent ; 
     glm::vec4 ce(gce.x,gce.y,gce.z, gce.w*1.4f );   // defines the center-extent of the region to view
 
+
     CSGOptiX cx(fd); 
 
-    float tmin = CXUtil::GetEValue<float>("TMIN", 1.0) ; // TODO: TMIN in extent units
-    float tmax = CXUtil::GetEValue<float>("TMAX", 10000.0) ;
+    float tmin = CXUtil::GetEValue<float>("TMIN", 0.1) ;
+    float tmax = CXUtil::GetEValue<float>("TMAX", 100.0) ;
 
     cx.setCE(ce, tmin, tmax); 
     cx.render( top.c_str() );  
